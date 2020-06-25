@@ -1,50 +1,55 @@
-<!-- <div *ngFor="let video of ChannelVideos" class="col-xl-3 col-md-6 mb-4">
-  <div class="card border-0 shadow vh-50">
-    <a
-      href="https://www.youtube.com/watch?v={{ video.id.videoId }}"
-      target="_blank"
+<div fxLayout="column" fxLayoutAlign="space-evenly center">
+  <div class="form" style="padding-top: 15px;">
+    <mat-form-field class="full-width">
+      <mat-label>Channle ID</mat-label>
+      <input
+        (keyup)="onKey($event)"
+        matInput
+        #message
+        maxlength="256"
+        placeholder="Youtube Channle id ..."
+      />
+      <mat-hint align="start"
+        ><strong>Enter Channle Id please</strong>
+      </mat-hint>
+    </mat-form-field>
+    <button
+      (click)="search()"
+      class="full-width"
+      mat-raised-button
+      color="accent"
     >
-      <img
-        [src]="video.snippet.thumbnails.medium.url"
-        class="card-img-top"
-        alt="..."
-    /></a>
-
-    <div class="card-body text-center">
-      <h5 class="card-title mb-0">
-        <a href="https://www.youtube.com/watch?v={{ video.id.videoId }}"
-          >{{ video.snippet.title }}
-        </a>
-      </h5>
-      <div class="card-text text-black-50">
-        {{ video.snippet.description.slice(0, 100) }}
-      </div>
-      <p class="card-text">{{ video.snippet.description }}</p>
-    </div>
+      Search
+    </button>
   </div>
-</div> -->
-<div fxLayout="column" fxLayoutAlign="space-around center">
-  <div *ngFor="let video of ChannelVideos">
-    <mat-card class="card">
-      <mat-card-header>
-        <div
-          mat-card-avatar
-          [ngStyle]="{
-            'background-image': getImgUrl(video.snippet.thumbnails.medium.url),
-            'background-size': 'cover'
-          }"
-        ></div>
-        <mat-card-title
-          ><a>{{ video.snippet.title }} </a></mat-card-title
-        >
-      </mat-card-header>
-      <iframe
-        [src]="getVideoUrl(video.id.videoId)"
-        frameborder="0"
-        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-      ></iframe>
-      <mat-card-content> </mat-card-content>
-    </mat-card>
+  <div cdkDropList class="list" (cdkDropListDropped)="drop($event)">
+    <div class="box" *ngFor="let video of ChannelVideos" cdkDrag>
+      <mat-card>
+        <mat-card-header>
+          <div
+            mat-card-avatar
+            [ngStyle]="{
+              'background-image': getImgUrl(
+                video.snippet.thumbnails.medium.url
+              ),
+              'background-size': 'cover'
+            }"
+          ></div>
+          <mat-card-title
+            ><a>{{ video.snippet.title }} </a></mat-card-title
+          >
+        </mat-card-header>
+        <iframe
+          style="display: block; margin-left: auto; margin-right: auto;"
+          width="560"
+          height="315"
+          [src]="getVideoUrl(video.id.videoId)"
+          frameborder="0"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+        <mat-card-content> </mat-card-content>
+      </mat-card>
+    </div>
   </div>
 </div>
