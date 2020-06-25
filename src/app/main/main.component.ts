@@ -3,16 +3,19 @@ import { YoutubeService } from '../service/youtube.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { DomSanitizer } from '@angular/platform-browser';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { LocalStorageService } from '../service/storage.service';
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss'],
 })
 export class MainComponent implements OnInit, OnDestroy {
-  channleId: String = '';
-  ChannelVideos: any[];
+  channleId: string = '';
+  ChannleVideos: any[] = [];
+  array: any[] = [];
   public $unsubscribe$: Subscription;
   constructor(
+    public storage: LocalStorageService,
     private youTubeService: YoutubeService,
     private sanitizer: DomSanitizer
   ) {}
@@ -22,14 +25,23 @@ export class MainComponent implements OnInit, OnDestroy {
     this.$unsubscribe$.unsubscribe();
   }
 
-  getChannelVideos(channleId: String) {
-    this.ChannelVideos = [];
+  getChannelVideos(channleId: string) {
+    this.ChannleVideos = [];
     this.youTubeService.getVideosForChanel(channleId, 15).subscribe((lista) => {
+      var i = 0;
       for (let element of lista['items']) {
-        this.ChannelVideos.push(element);
+        element = JSON.stringify(element).slice(0, -1);
+        element += `,"orderId": ${i}, "note": ""}`;
+        element = JSON.parse(element);
+        this.ChannleVideos.push(element);
+        i++;
       }
-      console.log(this.ChannelVideos);
+      var stringArray = JSON.stringify(this.ChannleVideos);
+      this.storage.Save('ChannleVideoArray', stringArray);
+      this.storage.UpdateChannlesList(channleId);
     });
+    this.array = JSON.parse(this.storage.Load('ChannleVideoArray'));
+    console.log(this.array);
   }
   getImgUrl(url) {
     return `url(${url})`;
@@ -40,21 +52,21 @@ export class MainComponent implements OnInit, OnDestroy {
     );
   }
   drop(event: CdkDragDrop<string[]>) {
-    console.log(this.ChannelVideos[0], event.previousIndex, event.currentIndex);
-
-    moveItemInArray(
-      this.ChannelVideos,
-      event.previousIndex,
-      event.currentIndex
-    );
+    for (var i = 0; i < this.array.length; i++) {
+      if (this.array[i].Id === event.previousIndex) {
+        this.array[i].orderId = event.currentIndex;
+      }
+    }
+    var stringArray = JSON.stringify(this.array);
+    this.storage.Save('ChannleVideoArray', stringArray);
+    this.array = JSON.parse(this.storage.Load('ChannleVideoArray'));
+    moveItemInArray(this.array, event.previousIndex, event.currentIndex);
   }
   onKey(event: any) {
     this.channleId = event.target.value;
   }
   search() {
-    this.ChannelVideos = [];
+    this.ChannleVideos = [];
     this.getChannelVideos(this.channleId);
-    console.log(this.channleId);
-    this.channleId = '';
   }
 }

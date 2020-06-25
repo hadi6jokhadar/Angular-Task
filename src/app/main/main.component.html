@@ -23,7 +23,7 @@
     </button>
   </div>
   <div cdkDropList class="list" (cdkDropListDropped)="drop($event)">
-    <div class="box" *ngFor="let video of ChannelVideos" cdkDrag>
+    <div class="box" *ngFor="let video of array" cdkDrag>
       <mat-card>
         <mat-card-header>
           <div
@@ -39,7 +39,8 @@
             ><a>{{ video.snippet.title }} </a></mat-card-title
           >
         </mat-card-header>
-        <iframe
+        <img [src]="video.snippet.thumbnails.high.url" />
+        <!-- <iframe
           style="display: block; margin-left: auto; margin-right: auto;"
           width="560"
           height="315"
@@ -47,7 +48,7 @@
           frameborder="0"
           allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
-        ></iframe>
+        ></iframe> -->
         <mat-card-content> </mat-card-content>
       </mat-card>
     </div>
