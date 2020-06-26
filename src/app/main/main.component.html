@@ -22,9 +22,9 @@
       Search
     </button>
   </div>
-  <div cdkDropList class="list" (cdkDropListDropped)="drop($event)">
+  <div cdkDropList class="list" (cdkDropListDropped)="drop($event)" fxLayout="column" fxLayoutAlign="space-around center" >
     <div class="box" *ngFor="let video of array" cdkDrag>
-      <mat-card>
+      <mat-card style="width: 100%;">
         <mat-card-header style="padding-bottom: 10px;">
           <div
             mat-card-avatar
@@ -39,16 +39,15 @@
             ><a>{{ video.snippet.title }} </a></mat-card-title
           >
         </mat-card-header>
-        <img *ngIf="showlist[video.orderId]==false" (click)="onClickMe(video.orderId)" [src]="video.snippet.thumbnails.high.url"/>
+        <img *ngIf="showlist[video.orderId]==false" (click)="onClickMe(video.orderId)" [src]="video.snippet.thumbnails.high.url" style="width: 100%"/>
         <iframe
           *ngIf="showlist[video.orderId]==true"
           id="video.orderId"
           style="
+            width: 100%;
             margin-left: auto;
             margin-right: auto;
           "
-          width="480"
-          height="360"
           [src]="getVideoUrl(video.id.videoId)"
           frameborder="0"
           allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
@@ -62,7 +61,7 @@
             (click)="save(video.orderId)"
             class="full-width"
             mat-raised-button
-            color="accent"
+            color="primary"
           >
             Save
           </button>

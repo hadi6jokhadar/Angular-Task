@@ -1,6 +1,5 @@
 .card {
-  max-width: 700px;
-  height: 400px;
+  width: 100%;
 }
 .form {
   min-width: 150px;
@@ -12,6 +11,7 @@
   width: 100%;
 }
 .list {
+  width: 100%;
   border: solid 1px #ccc;
   display: block;
   background: white;
@@ -20,7 +20,8 @@
 }
 
 .box {
-  width: 512px;
+  max-width: 700px;
+  width: 100%;
   padding-top: 10px;
   padding-bottom: 10px;
   border-bottom: solid 1px #ccc;
