@@ -11,8 +11,11 @@ import { LocalStorageService } from '../service/storage.service';
 })
 export class MainComponent implements OnInit, OnDestroy {
   channleId: string = '';
+  videoNote: string = '';
   ChannleVideos: any[] = [];
   array: any[] = [];
+  Channles: any[] = [];
+  showlist:boolean[]=[];
   public $unsubscribe$: Subscription;
   constructor(
     public storage: LocalStorageService,
@@ -26,22 +29,38 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   getChannelVideos(channleId: string) {
-    this.ChannleVideos = [];
-    this.youTubeService.getVideosForChanel(channleId, 15).subscribe((lista) => {
-      var i = 0;
-      for (let element of lista['items']) {
-        element = JSON.stringify(element).slice(0, -1);
-        element += `,"orderId": ${i}, "note": ""}`;
-        element = JSON.parse(element);
-        this.ChannleVideos.push(element);
-        i++;
-      }
-      var stringArray = JSON.stringify(this.ChannleVideos);
-      this.storage.Save('ChannleVideoArray', stringArray);
-      this.storage.UpdateChannlesList(channleId);
-    });
-    this.array = JSON.parse(this.storage.Load('ChannleVideoArray'));
-    console.log(this.array);
+    if (this.storage.Load('ChannlesList')) {
+      this.Channles = this.storage.Load('ChannlesList').split(', ');
+    }
+    if (this.Channles.includes(channleId)) {
+      this.array = JSON.parse(this.storage.Load('ChannleVideoArray'));
+      console.log(this.array);      
+      for(var i = 0 ;i<this.array.length;i++){
+        this.showlist[i]=false;
+      }      
+    } else {
+      this.ChannleVideos = [];
+      this.youTubeService
+        .getVideosForChanel(channleId, 15)
+        .subscribe((lista) => {
+          var i = 0;
+          for (let element of lista['items']) {
+            element = JSON.stringify(element).slice(0, -1);
+            element += `,"orderId": ${i}, "note": ""}`;
+            element = JSON.parse(element);
+            this.ChannleVideos.push(element);
+            this.showlist[i]=false;
+            i++;
+          }
+          this.storage.Save(
+            'ChannleVideoArray',
+            JSON.stringify(this.ChannleVideos)
+          );
+          this.storage.UpdateChannlesList(channleId);
+          this.array = JSON.parse(this.storage.Load('ChannleVideoArray'));
+          console.log('array', this.array);
+        });
+    }
   }
   getImgUrl(url) {
     return `url(${url})`;
@@ -52,15 +71,8 @@ export class MainComponent implements OnInit, OnDestroy {
     );
   }
   drop(event: CdkDragDrop<string[]>) {
-    for (var i = 0; i < this.array.length; i++) {
-      if (this.array[i].Id === event.previousIndex) {
-        this.array[i].orderId = event.currentIndex;
-      }
-    }
-    var stringArray = JSON.stringify(this.array);
-    this.storage.Save('ChannleVideoArray', stringArray);
-    this.array = JSON.parse(this.storage.Load('ChannleVideoArray'));
-    moveItemInArray(this.array, event.previousIndex, event.currentIndex);
+    moveItemInArray(this.array, event.previousIndex, event.currentIndex); 
+    this.storage.Save('ChannleVideoArray', JSON.stringify(this.array));
   }
   onKey(event: any) {
     this.channleId = event.target.value;
@@ -68,5 +80,25 @@ export class MainComponent implements OnInit, OnDestroy {
   search() {
     this.ChannleVideos = [];
     this.getChannelVideos(this.channleId);
+  }
+  onClickMe(id){
+    this.showlist[id]=true;
+    console.log(this.showlist);
+    
+  }
+  note(event: any){
+    this.videoNote = event.target.value;
+  }
+  save(id:any){
+    for (var i = 0; i < this.array.length; i++) {
+      if (this.array[i].orderId === id) {
+        this.array[i].note = this.videoNote;
+      }
+    }
+    var stringArray = JSON.stringify(this.array);
+    this.storage.Save('ChannleVideoArray', stringArray);
+    this.array = JSON.parse(this.storage.Load('ChannleVideoArray'));
+    this.videoNote='';
+    console.log(this.array);
   }
 }

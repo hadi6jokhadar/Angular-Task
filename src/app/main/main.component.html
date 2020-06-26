@@ -25,7 +25,7 @@
   <div cdkDropList class="list" (cdkDropListDropped)="drop($event)">
     <div class="box" *ngFor="let video of array" cdkDrag>
       <mat-card>
-        <mat-card-header>
+        <mat-card-header style="padding-bottom: 10px;">
           <div
             mat-card-avatar
             [ngStyle]="{
@@ -39,17 +39,35 @@
             ><a>{{ video.snippet.title }} </a></mat-card-title
           >
         </mat-card-header>
-        <img [src]="video.snippet.thumbnails.high.url" />
-        <!-- <iframe
-          style="display: block; margin-left: auto; margin-right: auto;"
-          width="560"
-          height="315"
+        <img *ngIf="showlist[video.orderId]==false" (click)="onClickMe(video.orderId)" [src]="video.snippet.thumbnails.high.url"/>
+        <iframe
+          *ngIf="showlist[video.orderId]==true"
+          id="video.orderId"
+          style="
+            margin-left: auto;
+            margin-right: auto;
+          "
+          width="480"
+          height="360"
           [src]="getVideoUrl(video.id.videoId)"
           frameborder="0"
           allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
-        ></iframe> -->
-        <mat-card-content> </mat-card-content>
+        ></iframe>
+        <mat-card-content>
+          <mat-form-field class="full-width">
+            <mat-label>Note</mat-label>
+            <textarea rows="3" matInput type="text" (keyup)="note($event)" style="resize: none;">{{video.note}}</textarea>
+            <button
+            (click)="save(video.orderId)"
+            class="full-width"
+            mat-raised-button
+            color="accent"
+          >
+            Save
+          </button>
+          </mat-form-field>
+        </mat-card-content>
       </mat-card>
     </div>
   </div>
