@@ -2,7 +2,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { YoutubeService } from '../service/youtube.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { DomSanitizer } from '@angular/platform-browser';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import {
+  CdkDragDrop,
+  moveItemInArray,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
 import { LocalStorageService } from '../service/storage.service';
 @Component({
   selector: 'app-main',
@@ -14,8 +18,10 @@ export class MainComponent implements OnInit, OnDestroy {
   videoNote: string = '';
   ChannleVideos: any[] = [];
   array: any[] = [];
+  array1: any[] = [];
+  array2: any[] = [];
   Channles: any[] = [];
-  showlist:boolean[]=[];
+  showlist: boolean[] = [];
   public $unsubscribe$: Subscription;
   constructor(
     public storage: LocalStorageService,
@@ -29,14 +35,23 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   getChannelVideos(channleId: string) {
-    if(this.storage.Load('ChannlesList')){
+    if (this.storage.Load('ChannlesList')) {
       if (this.storage.Load('ChannlesList').includes(channleId)) {
         this.Channles = this.storage.Load('ChannlesList');
         this.array = JSON.parse(this.storage.Load(channleId));
-        console.log(this.array);      
-        for(var i = 0 ;i<this.array.length;i++){
-          this.showlist[i]=false;
-        }      
+        for (var i: number = 0; i < Math.floor(this.array.length / 2); i++) {
+          this.array1.push(this.array[i]);
+        }
+        for (
+          var i: number = Math.floor(this.array.length / 2);
+          i < this.array.length;
+          i++
+        ) {
+          this.array2.push(this.array[i]);
+        }
+        for (var i = 0; i < this.array.length; i++) {
+          this.showlist[i] = false;
+        }
       } else {
         this.ChannleVideos = [];
         this.youTubeService
@@ -48,19 +63,29 @@ export class MainComponent implements OnInit, OnDestroy {
               element += `,"orderId": ${i}, "note": ""}`;
               element = JSON.parse(element);
               this.ChannleVideos.push(element);
-              this.showlist[i]=false;
+              this.showlist[i] = false;
               i++;
             }
-            this.storage.Save(
-              channleId,
-              JSON.stringify(this.ChannleVideos)
-            );
+            this.storage.Save(channleId, JSON.stringify(this.ChannleVideos));
             this.storage.UpdateChannlesList(channleId);
             this.array = JSON.parse(this.storage.Load(channleId));
-            console.log('array', this.array);
+            for (
+              var i: number = 0;
+              i < Math.floor(this.array.length / 2);
+              i++
+            ) {
+              this.array1.push(this.array[i]);
+            }
+            for (
+              var i: number = Math.floor(this.array.length / 2);
+              i < this.array.length;
+              i++
+            ) {
+              this.array2.push(this.array[i]);
+            }
           });
       }
-    }else {
+    } else {
       this.ChannleVideos = [];
       this.youTubeService
         .getVideosForChanel(channleId, 15)
@@ -71,19 +96,24 @@ export class MainComponent implements OnInit, OnDestroy {
             element += `,"orderId": ${i}, "note": ""}`;
             element = JSON.parse(element);
             this.ChannleVideos.push(element);
-            this.showlist[i]=false;
+            this.showlist[i] = false;
             i++;
           }
-          this.storage.Save(
-            channleId,
-            JSON.stringify(this.ChannleVideos)
-          );
+          this.storage.Save(channleId, JSON.stringify(this.ChannleVideos));
           this.storage.UpdateChannlesList(channleId);
           this.array = JSON.parse(this.storage.Load(channleId));
-          console.log('array', this.array);
+          for (var i: number = 0; i < Math.floor(this.array.length / 2); i++) {
+            this.array1.push(this.array[i]);
+          }
+          for (
+            var i: number = Math.floor(this.array.length / 2);
+            i < this.array.length;
+            i++
+          ) {
+            this.array2.push(this.array[i]);
+          }
         });
     }
-    
   }
   getImgUrl(url) {
     return `url(${url})`;
@@ -94,7 +124,35 @@ export class MainComponent implements OnInit, OnDestroy {
     );
   }
   drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.array, event.previousIndex, event.currentIndex); 
+    moveItemInArray(this.array, event.previousIndex, event.currentIndex);
+    this.storage.Save(this.channleId, JSON.stringify(this.array));
+  }
+  drop1(event: CdkDragDrop<string[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(this.array1, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        this.array2,
+        this.array1,
+        event.previousIndex,
+        event.currentIndex
+      );
+    }
+    this.array = this.array1.concat(this.array2);
+    this.storage.Save(this.channleId, JSON.stringify(this.array));
+  }
+  drop2(event: CdkDragDrop<string[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(this.array2, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        this.array1,
+        this.array2,
+        event.previousIndex,
+        event.currentIndex
+      );
+    }
+    this.array = this.array1.concat(this.array2);
     this.storage.Save(this.channleId, JSON.stringify(this.array));
   }
   onKey(event: any) {
@@ -104,15 +162,13 @@ export class MainComponent implements OnInit, OnDestroy {
     this.ChannleVideos = [];
     this.getChannelVideos(this.channleId);
   }
-  onClickMe(id){
-    this.showlist[id]=true;
-    console.log(this.showlist);
-    
+  onClickMe(id) {
+    this.showlist[id] = true;
   }
-  note(event: any){
+  note(event: any) {
     this.videoNote = event.target.value;
   }
-  save(id:any){
+  save(id: any) {
     for (var i = 0; i < this.array.length; i++) {
       if (this.array[i].orderId === id) {
         this.array[i].note = this.videoNote;
@@ -121,7 +177,16 @@ export class MainComponent implements OnInit, OnDestroy {
     var stringArray = JSON.stringify(this.array);
     this.storage.Save(this.channleId, stringArray);
     this.array = JSON.parse(this.storage.Load(this.channleId));
-    this.videoNote='';
-    console.log(this.array);
+    for (var i: number = 0; i < Math.floor(this.array.length / 2); i++) {
+      this.array1.push(this.array[i]);
+    }
+    for (
+      var i: number = Math.floor(this.array.length / 2);
+      i < this.array.length;
+      i++
+    ) {
+      this.array2.push(this.array[i]);
+    }
+    this.videoNote = '';
   }
 }

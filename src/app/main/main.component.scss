@@ -11,28 +11,20 @@
   width: 100%;
 }
 .list {
-  width: 100%;
-  border: solid 1px #ccc;
   display: block;
-  background: white;
-  border-radius: 4px;
   overflow: hidden;
 }
 
 .box {
-  max-width: 700px;
-  width: 100%;
+  height: 520px;
+  max-width: 400px;
   padding-top: 10px;
   padding-bottom: 10px;
-  border-bottom: solid 1px #ccc;
-  color: rgba(0, 0, 0, 0.87);
-  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
   cursor: move;
-  background: white;
   font-size: 14px;
 }
 
